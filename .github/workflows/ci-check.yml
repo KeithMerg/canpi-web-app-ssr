@@ -1,0 +1,19 @@
+name: ci-check
+on:
+  push:
+    branches: ['ci-**']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: cargo --version && rustc --version
+      - name: Build
+        run: cargo build --all-targets --locked
+      - name: Test (one at a time, as some tests share files)
+        run: cargo test --locked -- --nocapture --test-threads=1
+      - name: Format check (information only)
+        if: always()
+        continue-on-error: true
+        run: cargo fmt -- --check
